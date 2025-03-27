@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Booklet Creator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #preview {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Booklet Creator</h1>
+    <div class="upload-area">
+        <h2>Upload PDF</h2>
+        <input type="file" id="pdfInput" accept=".pdf">
+        <button id="uploadBtn">Create Booklet</button>
+    </div>
+    <div id="status"></div>
+    <h2>Preview:</h2>
+    <iframe id="preview" src="about:blank"></iframe>
+
+    <script>
+        document.getElementById('uploadBtn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('pdfInput');
+            const statusDiv = document.getElementById('status');
+            
+            if (!fileInput.files.length) {
+                statusDiv.textContent = 'Please select a PDF file';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdf', fileInput.files[0]);
+
+            statusDiv.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('preview').src = result.url;
+                    statusDiv.textContent = 'Booklet created successfully!';
+                } else {
+                    statusDiv.textContent = 'Error: ' + (result.error || 'Unknown error');
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
